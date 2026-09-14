@@ -1,0 +1,8 @@
+build/
+*.user
+*.i360proj
+.~lock.*
+vendor/insta360-mediasdk-package/
+vendor/insta360-mediasdk-runtime/
+vendor/insta360-camerasdk/
+vendor/Desktop-MediaSDK-Cpp/
