@@ -16,6 +16,7 @@
 #include <QPushButton>
 #include <QSize>
 #include <QSpinBox>
+#include <QStyle>
 #include <QThread>
 #include <QVBoxLayout>
 
@@ -214,7 +215,9 @@ LiveCameraDialog::LiveCameraDialog(QWidget *parent) : QDialog(parent)
     auto *buttons = new QHBoxLayout;
     status_ = new QLabel(QStringLiteral("Sedia")); status_->setWordWrap(true);
     start_ = new QPushButton(QStringLiteral("Start Live"));
+    start_->setIcon(style()->standardIcon(QStyle::SP_MediaPlay));
     stop_ = new QPushButton(QStringLiteral("Stop")); stop_->setEnabled(false);
+    stop_->setIcon(style()->standardIcon(QStyle::SP_MediaStop));
     buttons->addWidget(status_, 1); buttons->addWidget(start_); buttons->addWidget(stop_);
     root->addLayout(buttons);
 

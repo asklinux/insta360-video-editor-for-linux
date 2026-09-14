@@ -80,6 +80,8 @@ private:
     const TimelineClip *selectedTimelineClip() const;
     QString currentPreviewPath() const;
     QString sdkExporterPath() const;
+    QString cameraToolPath() const;
+    bool downloadRemoteMedia(MediaItem *media);
     QStringList pairedInsta360Inputs(const QString &path) const;
     bool createSdkPreviewFrame(const QString &path, double seconds, const QString &outputPath) const;
     QString buildPreviewVideoFilter(const TimelineClip &clip) const;

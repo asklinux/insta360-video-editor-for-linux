@@ -15,9 +15,10 @@ Untuk release sebenar, build dengan SDK rasmi supaya semua runtime library Insta
   - stitch type `optflow`, `dynamicstitch`, `template`, `aistitch`
   - FlowState, direction lock, CUDA, software encode/decode
   - lokasi fail projek `.i360proj`
-- Import media dari fail atau folder kamera/mount Insta360.
-- Dark professional editor UI.
-- Media Library di sebelah kiri.
+- Import media tempatan atau baca terus senarai fail kamera melalui CameraSDK.
+- Senarai kamera dipaparkan dalam Media Library di sebelah kiri tanpa memuat turun fail.
+- Fail kamera hanya dimuat turun apabila pengguna double-click atau menambahnya ke timeline; pasangan `_00_`/`_10_` turut diambil secara automatik.
+- Dark professional editor UI dengan ikon native bertema pada fungsi utama, menu, media dan timeline.
 - Video Preview di tengah menggunakan FFmpeg frame extraction.
 - Inspector di sebelah kanan dengan tabs `Video`, `360`, `Color`, `Audio`, `Effects`.
 - Timeline di bahagian bawah dengan double click atau drag/drop dari media bin.
@@ -76,6 +77,7 @@ Build pembangunan menggunakan RPATH ke library SDK yang diekstrak dan symlink `b
 Selepas build dengan SDK rasmi:
 
 - `insta360_sdk_exporter` disalin ke folder yang sama dengan `insta360_editor`.
+- `insta360_camera_tool` dibina untuk senarai jauh dan download atas permintaan melalui CameraSDK 2.1.8.
 - Runtime library SDK dari `INSTA360_MEDIASDK_LIBRARY_DIR` disalin ke folder executable.
 - RPATH diset kepada `$ORIGIN`, jadi aplikasi/helper akan mencari library yang dibundle dahulu.
 
@@ -93,6 +95,18 @@ Apabila helper ditemui, fail `.insv/.insp/.lrv` diproses melalui API MediaSDK:
 Jika user pilih `CUDA/GPU`, aplikasi tidak menghantar `--disable_cuda`, jadi MediaSDK GPU path digunakan. Jika user pilih GPU untuk media Insta360 tetapi helper SDK tidak ditemui, export akan dihentikan dengan mesej ralat supaya proses tidak jatuh balik secara senyap kepada CPU.
 
 Untuk bahan dual-file seperti `_00_` dan `_10_`, exporter akan mencari pasangan fail dalam folder yang sama.
+
+## Media Kamera Tanpa Download Awal
+
+Sambungkan kamera Insta360 melalui kaedah yang disokong CameraSDK, kemudian tekan
+`Browse Camera (No Download)`. Aplikasi memanggil `GetCameraFilesList` dan meletakkan
+entri berikon rangkaian dalam Media Library sebelah kiri. Entri berlabel
+`Pada kamera` menyimpan path jauh sahaja; kandungan fail belum disalin ke projek.
+
+Pilih `Add To Timeline`, double-click, atau drag entri ke timeline untuk memanggil
+`DownloadCameraFile`. Progress dipaparkan dalam UI dan fail disimpan ke folder
+`media/` projek. Membatalkan operasi akan memadam fail separa. Pembukaan item untuk
+preview sahaja tidak menyebabkan download.
 
 ## Inspector Tabs
 
@@ -142,5 +156,6 @@ Ini memastikan fail MP4 membawa metadata 360 panorama. Untuk workflow penerbitan
 
 - `src/` - aplikasi Qt utama
 - `tools/insta360_sdk_exporter.cpp` - helper CLI pilihan untuk MediaSDK sebenar
+- `tools/insta360_camera_tool.cpp` - senarai fail kamera dan download atas permintaan
 - `vendor/Desktop-MediaSDK-Cpp/` - repo rujukan rasmi pilihan (tidak dimasukkan dalam Git)
 - `MEDIASDK_COVERAGE.md` - pemetaan API manual kepada fungsi aplikasi

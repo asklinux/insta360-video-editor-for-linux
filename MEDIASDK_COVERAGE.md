@@ -29,6 +29,14 @@ Dialog `MediaSDK > Live Camera / Real-Time Stitching` menggunakan CameraSDK
 output resolution, stitch type, accessory, video delay, bitrate, FlowState,
 direction lock, defringe, deflicker dan software decode.
 
+## Pelayar media kamera
+
+Butang `Browse Camera (No Download)` menggunakan CameraSDK 2.1.8
+`GetCameraFilesList` untuk memaparkan fail jauh dalam Media Library sebelah kiri.
+Tiada fail disalin semasa senarai dibaca atau item dipilih untuk preview.
+`DownloadCameraFile` hanya dipanggil apabila item ditambah ke timeline, dengan
+progress, cancel, pembersihan fail separa dan pengambilan pasangan `_00_`/`_10_`.
+
 ## Peraturan output
 
 - Input MediaSDK sentiasa distitch pada nisbah 2:1 seperti diwajibkan manual.

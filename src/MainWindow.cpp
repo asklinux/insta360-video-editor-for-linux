@@ -32,6 +32,7 @@
 #include <QMimeData>
 #include <QProcess>
 #include <QProgressBar>
+#include <QProgressDialog>
 #include <QPushButton>
 #include <QScrollArea>
 #include <QSlider>
@@ -40,11 +41,13 @@
 #include <QStackedWidget>
 #include <QStandardPaths>
 #include <QStatusBar>
+#include <QStyle>
 #include <QTabWidget>
 #include <QTemporaryFile>
 #include <QTextEdit>
 #include <QThread>
 #include <QTimer>
+#include <QUrl>
 #include <QtMath>
 
 namespace {
@@ -148,9 +151,11 @@ QWidget *MainWindow::buildStartPage()
     subtitle->setObjectName(QStringLiteral("StartSubtitle"));
 
     auto *createButton = new QPushButton(QStringLiteral("Create Project"));
+    createButton->setIcon(style()->standardIcon(QStyle::SP_FileDialogNewFolder));
     createButton->setObjectName(QStringLiteral("PrimaryButton"));
     createButton->setMinimumHeight(48);
     auto *openButton = new QPushButton(QStringLiteral("Open Project"));
+    openButton->setIcon(style()->standardIcon(QStyle::SP_DialogOpenButton));
     openButton->setMinimumHeight(44);
 
     auto *buttonRow = new QHBoxLayout;
@@ -187,7 +192,9 @@ QWidget *MainWindow::buildEditorPage()
     projectSummary_ = new QLabel;
     projectSummary_->setObjectName(QStringLiteral("ProjectSummary"));
     auto *saveButton = new QPushButton(QStringLiteral("Save"));
+    saveButton->setIcon(style()->standardIcon(QStyle::SP_DialogSaveButton));
     auto *exportButton = new QPushButton(QStringLiteral("Export MP4"));
+    exportButton->setIcon(style()->standardIcon(QStyle::SP_DialogApplyButton));
     exportButton->setObjectName(QStringLiteral("PrimaryButton"));
     toolbar->addWidget(projectSummary_, 1);
     toolbar->addWidget(saveButton);
@@ -205,8 +212,12 @@ QWidget *MainWindow::buildEditorPage()
     auto *mediaTitle = new QLabel(QStringLiteral("Media Library"));
     mediaTitle->setObjectName(QStringLiteral("PanelTitle"));
     auto *importButton = new QPushButton(QStringLiteral("Import Media"));
-    auto *cameraButton = new QPushButton(QStringLiteral("Import From Camera"));
+    importButton->setIcon(style()->standardIcon(QStyle::SP_DialogOpenButton));
+    auto *cameraButton = new QPushButton(QStringLiteral("Browse Camera (No Download)"));
+    cameraButton->setIcon(style()->standardIcon(QStyle::SP_DriveNetIcon));
+    cameraButton->setToolTip(QStringLiteral("Papar senarai media kamera tanpa memuat turun fail"));
     auto *addButton = new QPushButton(QStringLiteral("Add To Timeline"));
+    addButton->setIcon(style()->standardIcon(QStyle::SP_ArrowRight));
     mediaList_ = new QListWidget;
     mediaList_->setDragEnabled(true);
     mediaList_->setSelectionMode(QAbstractItemView::ExtendedSelection);
@@ -241,11 +252,13 @@ QWidget *MainWindow::buildEditorPage()
         QStringLiteral("Interactive 360 Mouse View")
     });
     reset360ViewButton_ = new QPushButton(QStringLiteral("Reset 360 View"));
+    reset360ViewButton_->setIcon(style()->standardIcon(QStyle::SP_BrowserReload));
     previewModeRow->addWidget(previewViewCombo_, 1);
     previewModeRow->addWidget(reset360ViewButton_);
 
     auto *previewControls = new QHBoxLayout;
     playButton_ = new QPushButton(QStringLiteral("Play"));
+    playButton_->setIcon(style()->standardIcon(QStyle::SP_MediaPlay));
     previewSlider_ = new QSlider(Qt::Horizontal);
     previewSlider_->setRange(0, 600);
     previewControls->addWidget(playButton_);
@@ -275,6 +288,7 @@ QWidget *MainWindow::buildEditorPage()
     exportProgress_->setRange(0, 100);
     exportProgress_->setValue(0);
     cancelExportButton_ = new QPushButton(QStringLiteral("Cancel Export"));
+    cancelExportButton_->setIcon(style()->standardIcon(QStyle::SP_DialogCancelButton));
     cancelExportButton_->setEnabled(false);
 
     auto *timelinePanel = new QWidget;
@@ -655,31 +669,31 @@ QWidget *MainWindow::buildSdkInspectorTab()
 void MainWindow::buildMenus()
 {
     auto *fileMenu = menuBar()->addMenu(QStringLiteral("File"));
-    fileMenu->addAction(QStringLiteral("New Project"), this, &MainWindow::newProject);
-    fileMenu->addAction(QStringLiteral("Open Project"), this, &MainWindow::openProjectDialog);
-    fileMenu->addAction(QStringLiteral("Save Project"), this, &MainWindow::saveCurrentProject);
+    fileMenu->addAction(style()->standardIcon(QStyle::SP_FileDialogNewFolder), QStringLiteral("New Project"), this, &MainWindow::newProject);
+    fileMenu->addAction(style()->standardIcon(QStyle::SP_DialogOpenButton), QStringLiteral("Open Project"), this, &MainWindow::openProjectDialog);
+    fileMenu->addAction(style()->standardIcon(QStyle::SP_DialogSaveButton), QStringLiteral("Save Project"), this, &MainWindow::saveCurrentProject);
     fileMenu->addSeparator();
-    fileMenu->addAction(QStringLiteral("Quit"), qApp, &QApplication::quit);
+    fileMenu->addAction(style()->standardIcon(QStyle::SP_DialogCloseButton), QStringLiteral("Quit"), qApp, &QApplication::quit);
 
     auto *editMenu = menuBar()->addMenu(QStringLiteral("Edit"));
-    editMenu->addAction(QStringLiteral("Add Selected To Timeline"), this, &MainWindow::addSelectedMediaToTimeline);
+    editMenu->addAction(style()->standardIcon(QStyle::SP_ArrowRight), QStringLiteral("Add Selected To Timeline"), this, &MainWindow::addSelectedMediaToTimeline);
 
     auto *viewMenu = menuBar()->addMenu(QStringLiteral("View"));
-    viewMenu->addAction(QStringLiteral("Refresh Media Library"), this, &MainWindow::refreshMediaList);
-    viewMenu->addAction(QStringLiteral("Media Info (MediaSDK)"), this, &MainWindow::showSelectedMediaInfo);
+    viewMenu->addAction(style()->standardIcon(QStyle::SP_BrowserReload), QStringLiteral("Refresh Media Library"), this, &MainWindow::refreshMediaList);
+    viewMenu->addAction(style()->standardIcon(QStyle::SP_MessageBoxInformation), QStringLiteral("Media Info (MediaSDK)"), this, &MainWindow::showSelectedMediaInfo);
 
     auto *playbackMenu = menuBar()->addMenu(QStringLiteral("Playback"));
-    playbackMenu->addAction(QStringLiteral("Play/Pause Preview"), this, &MainWindow::togglePreviewPlayback);
+    playbackMenu->addAction(style()->standardIcon(QStyle::SP_MediaPlay), QStringLiteral("Play/Pause Preview"), this, &MainWindow::togglePreviewPlayback);
 
     auto *exportMenu = menuBar()->addMenu(QStringLiteral("Export"));
-    exportMenu->addAction(QStringLiteral("Export MP4"), this, &MainWindow::exportProject);
-    exportMenu->addAction(QStringLiteral("Export Selected Frames…"), this, &MainWindow::exportSelectedFrames);
+    exportMenu->addAction(style()->standardIcon(QStyle::SP_DialogApplyButton), QStringLiteral("Export MP4"), this, &MainWindow::exportProject);
+    exportMenu->addAction(style()->standardIcon(QStyle::SP_DirIcon), QStringLiteral("Export Selected Frames…"), this, &MainWindow::exportSelectedFrames);
 
     auto *sdkMenu = menuBar()->addMenu(QStringLiteral("MediaSDK"));
-    sdkMenu->addAction(QStringLiteral("Project & SDK Settings…"), this, &MainWindow::editProjectSettings);
-    sdkMenu->addAction(QStringLiteral("SDK Status…"), this, &MainWindow::showSdkStatus);
+    sdkMenu->addAction(style()->standardIcon(QStyle::SP_FileDialogDetailedView), QStringLiteral("Project & SDK Settings…"), this, &MainWindow::editProjectSettings);
+    sdkMenu->addAction(style()->standardIcon(QStyle::SP_MessageBoxInformation), QStringLiteral("SDK Status…"), this, &MainWindow::showSdkStatus);
 #ifdef INSTA360_HAS_LIVE_CAMERA
-    sdkMenu->addAction(QStringLiteral("Live Camera / Real-Time Stitching…"), this, &MainWindow::openLiveCamera);
+    sdkMenu->addAction(style()->standardIcon(QStyle::SP_ComputerIcon), QStringLiteral("Live Camera / Real-Time Stitching…"), this, &MainWindow::openLiveCamera);
 #endif
 }
 
@@ -926,21 +940,69 @@ void MainWindow::importFromCamera()
         }
     }
 
-    QString initial;
-    const QStringList roots = cameraRoots();
-    if (!roots.isEmpty()) {
-        initial = roots.first();
-    }
-    const QString directory = QFileDialog::getExistingDirectory(this, QStringLiteral("Pilih folder kamera Insta360"), initial);
-    if (directory.isEmpty()) {
+    const QString tool = cameraToolPath();
+    if (tool.isEmpty()) {
+        QMessageBox::warning(this, QStringLiteral("CameraSDK"), QStringLiteral("insta360_camera_tool tidak ditemui. Jalankan setup SDK dan build semula."));
         return;
     }
-    const QStringList files = supportedFilesInDirectory(directory);
-    if (files.isEmpty()) {
-        QMessageBox::information(this, QStringLiteral("Tiada media"), QStringLiteral("Tiada fail Insta360/video yang disokong ditemui dalam folder itu."));
+
+    QProgressDialog progress(QStringLiteral("Membaca senarai media terus dari kamera…"), QStringLiteral("Cancel"), 0, 0, this);
+    progress.setWindowModality(Qt::WindowModal);
+    progress.setMinimumDuration(0);
+    QProcess process;
+    process.start(tool, {QStringLiteral("--list")});
+    if (!process.waitForStarted(10000)) {
+        QMessageBox::critical(this, QStringLiteral("CameraSDK"), process.errorString());
         return;
     }
-    importPaths(files, true);
+    while (!process.waitForFinished(100)) {
+        qApp->processEvents();
+        if (progress.wasCanceled()) {
+            process.terminate();
+            process.waitForFinished(3000);
+            return;
+        }
+    }
+    progress.close();
+    const QString output = QString::fromUtf8(process.readAllStandardOutput());
+    if (process.exitCode() != 0) {
+        QMessageBox::warning(this, QStringLiteral("CameraSDK"), QString::fromUtf8(process.readAllStandardError()).trimmed());
+        return;
+    }
+
+    QString device;
+    int added = 0;
+    for (const QString &line : output.split(QLatin1Char('\n'), Qt::SkipEmptyParts)) {
+        if (line.startsWith(QStringLiteral("device="))) {
+            device = line.mid(7).replace(QLatin1Char('|'), QStringLiteral(" · "));
+            continue;
+        }
+        if (!line.startsWith(QStringLiteral("file="))) continue;
+        const QString remotePath = line.mid(5).trimmed();
+        const QString fileName = QUrl(remotePath).fileName().isEmpty()
+            ? QFileInfo(remotePath).fileName() : QUrl(remotePath).fileName();
+        if (!isSupportedMediaFile(fileName)) continue;
+        const bool exists = std::any_of(project_.media.cbegin(), project_.media.cend(), [&remotePath](const MediaItem &item) {
+            return item.originalPath == remotePath;
+        });
+        if (exists) continue;
+        MediaItem item;
+        item.id = makeMediaId();
+        item.displayName = fileName;
+        item.originalPath = remotePath;
+        item.kind = QStringLiteral("camera-remote");
+        item.insta360 = isInsta360File(fileName);
+        project_.media.append(item);
+        ++added;
+    }
+    refreshMediaList();
+    saveCurrentProject();
+    appendLog(QStringLiteral("Camera: %1 — %2 item baru dipaparkan tanpa download.")
+        .arg(device.isEmpty() ? QStringLiteral("connected") : device).arg(added));
+    if (added == 0) {
+        QMessageBox::information(this, QStringLiteral("Camera Library"),
+            QStringLiteral("Tiada media baru. Item yang sudah pernah diimport kekal dalam senarai kiri."));
+    }
 }
 
 void MainWindow::addSelectedMediaToTimeline()
@@ -954,6 +1016,10 @@ void MainWindow::addMediaToTimeline(const QString &mediaId)
 {
     MediaItem *media = findMedia(mediaId);
     if (!media) {
+        return;
+    }
+
+    if (media->kind == QStringLiteral("camera-remote") && !downloadRemoteMedia(media)) {
         return;
     }
 
@@ -988,6 +1054,11 @@ void MainWindow::previewMedia(QListWidgetItem *item)
     previewSlider_->setValue(0);
     previewSlider_->blockSignals(false);
     previewTitle_->setText(item->text());
+    if (item->data(Qt::UserRole + 2).toString() == QStringLiteral("camera-remote")) {
+        previewLabel_->setPixmap(QPixmap());
+        previewLabel_->setText(QStringLiteral("Media berada pada kamera\nDouble-click atau Add To Timeline untuk download apabila diperlukan."));
+        return;
+    }
     renderPreviewFrame(item->data(Qt::UserRole).toString(), 0.0);
 }
 
@@ -1118,8 +1189,10 @@ void MainWindow::refreshMediaList()
 {
     mediaList_->clear();
     for (const MediaItem &media : project_.media) {
-        auto *item = new QListWidgetItem(media.displayName);
-        item->setToolTip(media.path);
+        const bool remote = media.kind == QStringLiteral("camera-remote");
+        auto *item = new QListWidgetItem(remote ? media.displayName + QStringLiteral("\n☁ Pada kamera") : media.displayName);
+        item->setIcon(style()->standardIcon(remote ? QStyle::SP_DriveNetIcon : QStyle::SP_FileIcon));
+        item->setToolTip(remote ? media.originalPath + QStringLiteral("\nBelum dimuat turun") : media.path);
         item->setData(Qt::UserRole, media.path);
         item->setData(Qt::UserRole + 1, media.id);
         item->setData(Qt::UserRole + 2, media.kind);
@@ -1134,6 +1207,7 @@ void MainWindow::refreshTimeline()
     int number = 1;
     for (const TimelineClip &clip : project_.timeline) {
         auto *item = new QListWidgetItem(QStringLiteral("%1\n%2").arg(number++).arg(clip.displayName));
+        item->setIcon(style()->standardIcon(QStyle::SP_MediaPlay));
         item->setToolTip(clip.path);
         item->setData(Qt::UserRole, clip.mediaId);
         item->setSizeHint(QSize(180, 96));
@@ -1485,6 +1559,95 @@ QString MainWindow::sdkExporterPath() const
     return QStandardPaths::findExecutable(QStringLiteral("insta360_sdk_exporter"));
 }
 
+QString MainWindow::cameraToolPath() const
+{
+    const QString environment = qEnvironmentVariable("INSTA360_CAMERA_TOOL");
+    if (!environment.isEmpty() && QFileInfo::exists(environment)) return environment;
+    const QString bundled = QCoreApplication::applicationDirPath() + QStringLiteral("/insta360_camera_tool");
+    if (QFileInfo::exists(bundled)) return bundled;
+    return QStandardPaths::findExecutable(QStringLiteral("insta360_camera_tool"));
+}
+
+bool MainWindow::downloadRemoteMedia(MediaItem *media)
+{
+    if (!media || media->kind != QStringLiteral("camera-remote")) return media != nullptr;
+    const QString tool = cameraToolPath();
+    if (tool.isEmpty()) {
+        QMessageBox::critical(this, QStringLiteral("Camera download"), QStringLiteral("insta360_camera_tool tidak ditemui."));
+        return false;
+    }
+
+    QList<MediaItem *> downloads {media};
+    QString peerName = media->displayName;
+    if (peerName.contains(QStringLiteral("_00_"))) peerName.replace(QStringLiteral("_00_"), QStringLiteral("_10_"));
+    else if (peerName.contains(QStringLiteral("_10_"))) peerName.replace(QStringLiteral("_10_"), QStringLiteral("_00_"));
+    else peerName.clear();
+    if (!peerName.isEmpty()) {
+        for (MediaItem &candidate : project_.media) {
+            if (&candidate != media && candidate.kind == QStringLiteral("camera-remote") && candidate.displayName == peerName) {
+                downloads.append(&candidate);
+                break;
+            }
+        }
+    }
+
+    for (MediaItem *item : downloads) {
+        const QString destination = QDir(project_.projectDir).filePath(QStringLiteral("media/") + item->displayName);
+        if (!QFileInfo::exists(destination)) {
+            QProgressDialog progress(QStringLiteral("Download %1 dari kamera…").arg(item->displayName),
+                QStringLiteral("Cancel"), 0, 100, this);
+            progress.setWindowModality(Qt::WindowModal);
+            progress.setMinimumDuration(0);
+            progress.setValue(0);
+
+            QProcess process;
+            process.setProcessChannelMode(QProcess::MergedChannels);
+            process.start(tool, {QStringLiteral("--download"), item->originalPath, destination});
+            if (!process.waitForStarted(10000)) {
+                QMessageBox::critical(this, QStringLiteral("Camera download"), process.errorString());
+                return false;
+            }
+            QByteArray pending;
+            while (!process.waitForFinished(100)) {
+                qApp->processEvents();
+                pending += process.readAll();
+                const QList<QByteArray> lines = pending.split('\n');
+                pending = lines.isEmpty() ? QByteArray() : lines.last();
+                for (int i = 0; i + 1 < lines.size(); ++i) {
+                    if (!lines[i].startsWith("progress=")) continue;
+                    const QList<QByteArray> values = lines[i].mid(9).split('/');
+                    if (values.size() == 2 && values[1].toLongLong() > 0) {
+                        progress.setValue(static_cast<int>(values[0].toDouble() * 100.0 / values[1].toDouble()));
+                    }
+                }
+                if (progress.wasCanceled()) {
+                    process.terminate();
+                    if (!process.waitForFinished(3000)) process.kill();
+                    QFile::remove(destination);
+                    return false;
+                }
+            }
+            pending += process.readAll();
+            if (process.exitStatus() != QProcess::NormalExit || process.exitCode() != 0 || !QFileInfo::exists(destination)) {
+                QFile::remove(destination);
+                QMessageBox::critical(this, QStringLiteral("Camera download"), QString::fromUtf8(pending).trimmed());
+                return false;
+            }
+            progress.setValue(100);
+        }
+        item->path = destination;
+        const QString suffix = QFileInfo(destination).suffix().toLower();
+        item->kind = (suffix == QStringLiteral("jpg") || suffix == QStringLiteral("jpeg")
+            || suffix == QStringLiteral("png") || suffix == QStringLiteral("insp"))
+            ? QStringLiteral("image") : QStringLiteral("video");
+    }
+
+    refreshMediaList();
+    saveCurrentProject();
+    appendLog(QStringLiteral("Media kamera dimuat turun apabila diperlukan: %1").arg(media->displayName));
+    return true;
+}
+
 QStringList MainWindow::pairedInsta360Inputs(const QString &path) const
 {
     QStringList inputs { path };
@@ -1823,6 +1986,7 @@ void MainWindow::startPreviewPlayback()
         }
         playbackBuffer_.clear();
         playButton_->setText(QStringLiteral("Play"));
+        playButton_->setIcon(style()->standardIcon(QStyle::SP_MediaPlay));
     });
 
     playbackProcess_->start(QStringLiteral("ffmpeg"), args);
@@ -1834,12 +1998,14 @@ void MainWindow::startPreviewPlayback()
     }
 
     playButton_->setText(QStringLiteral("Pause"));
+    playButton_->setIcon(style()->standardIcon(QStyle::SP_MediaPause));
 }
 
 void MainWindow::stopPreviewPlayback()
 {
     if (!playbackProcess_) {
         playButton_->setText(QStringLiteral("Play"));
+        playButton_->setIcon(style()->standardIcon(QStyle::SP_MediaPlay));
         return;
     }
 
@@ -1854,6 +2020,7 @@ void MainWindow::stopPreviewPlayback()
     process->deleteLater();
     playbackBuffer_.clear();
     playButton_->setText(QStringLiteral("Play"));
+    playButton_->setIcon(style()->standardIcon(QStyle::SP_MediaPlay));
 }
 
 void MainWindow::readPlaybackFrames()

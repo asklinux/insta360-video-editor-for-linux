@@ -149,6 +149,15 @@ if(INSTA360_MEDIASDK_INCLUDE_DIR AND INSTA360_MEDIASDK_LIBRARIES)
     find_library(INSTA360_CAMERASDK_LIBRARY NAMES CameraSDK
         PATHS "${INSTA360_CAMERASDK_ROOT}/lib" NO_DEFAULT_PATH)
     if(INSTA360_CAMERASDK_LIBRARY)
+        add_executable(insta360_camera_tool tools/insta360_camera_tool.cpp)
+        target_include_directories(insta360_camera_tool PRIVATE "${INSTA360_CAMERASDK_ROOT}/include")
+        target_link_libraries(insta360_camera_tool PRIVATE "${INSTA360_CAMERASDK_LIBRARY}")
+        set_target_properties(insta360_camera_tool PROPERTIES
+            BUILD_RPATH "${INSTA360_CAMERASDK_ROOT}/lib;$ORIGIN")
+        add_custom_command(TARGET insta360_camera_tool POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:insta360_camera_tool>
+                $<TARGET_FILE_DIR:insta360_editor>)
+        install(TARGETS insta360_camera_tool RUNTIME DESTINATION bin)
         target_sources(insta360_editor PRIVATE src/LiveCameraDialog.cpp src/LiveCameraDialog.h)
         target_include_directories(insta360_editor PRIVATE
             "${INSTA360_MEDIASDK_INCLUDE_DIR}" "${INSTA360_CAMERASDK_ROOT}/include")
@@ -161,6 +170,8 @@ if(INSTA360_MEDIASDK_INCLUDE_DIR AND INSTA360_MEDIASDK_LIBRARIES)
             list(APPEND _INSTA360_EDITOR_INSTALL_RPATH
                 "${INSTA360_CAMERASDK_ROOT}/lib" "${INSTA360_MEDIASDK_LIBRARY_DIR}")
         endif()
+        set_target_properties(insta360_camera_tool PROPERTIES
+            INSTALL_RPATH "${_INSTA360_EDITOR_INSTALL_RPATH}")
         set_target_properties(insta360_editor PROPERTIES
             BUILD_RPATH "${INSTA360_CAMERASDK_ROOT}/lib;${INSTA360_MEDIASDK_LIBRARY_DIR};$ORIGIN"
             INSTALL_RPATH "${_INSTA360_EDITOR_INSTALL_RPATH}")

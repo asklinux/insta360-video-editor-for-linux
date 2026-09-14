@@ -16,6 +16,7 @@
 #include <QSlider>
 #include <QSpinBox>
 #include <QStandardPaths>
+#include <QStyle>
 #include <QVBoxLayout>
 
 ProjectDialog::ProjectDialog(QWidget *parent, const Project *existingProject)
@@ -42,6 +43,7 @@ ProjectDialog::ProjectDialog(QWidget *parent, const Project *existingProject)
     dirLayout->setContentsMargins(0, 0, 0, 0);
     dirLayout->addWidget(directoryEdit_);
     auto *browseDirButton = new QPushButton(QStringLiteral("Pilih"));
+    browseDirButton->setIcon(style()->standardIcon(QStyle::SP_DirOpenIcon));
     dirLayout->addWidget(browseDirButton);
 
     projectForm->addRow(QStringLiteral("Nama projek"), nameEdit_);
@@ -148,6 +150,7 @@ ProjectDialog::ProjectDialog(QWidget *parent, const Project *existingProject)
 
     aiModelEdit_ = new QLineEdit;
     auto *aiModelButton = new QPushButton(QStringLiteral("Pilih"));
+    aiModelButton->setIcon(style()->standardIcon(QStyle::SP_DirOpenIcon));
     auto *modelRow = new QWidget;
     auto *modelLayout = new QHBoxLayout(modelRow);
     modelLayout->setContentsMargins(0, 0, 0, 0);
@@ -176,6 +179,8 @@ ProjectDialog::ProjectDialog(QWidget *parent, const Project *existingProject)
 
     auto *buttons = new QDialogButtonBox(QDialogButtonBox::Cancel | QDialogButtonBox::Ok);
     buttons->button(QDialogButtonBox::Ok)->setText(editing_ ? QStringLiteral("Simpan Tetapan") : QStringLiteral("Create Project"));
+    buttons->button(QDialogButtonBox::Ok)->setIcon(style()->standardIcon(QStyle::SP_DialogApplyButton));
+    buttons->button(QDialogButtonBox::Cancel)->setIcon(style()->standardIcon(QStyle::SP_DialogCancelButton));
     root->addWidget(buttons);
 
     connect(browseDirButton, &QPushButton::clicked, this, &ProjectDialog::chooseProjectDirectory);
